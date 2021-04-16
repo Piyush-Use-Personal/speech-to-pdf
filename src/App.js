@@ -1,39 +1,15 @@
-import { useRef, useState } from "react";
+import React, {useState, useRef} from "react";
+import Pdf from "react-to-pdf";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import "./App.css";
 
-function App() {
-  const commands = [
-    {
-      command: "open *",
-      callback: (website) => {
-        window.open("http://" + website.split(" ").join(""));
-      },
-    },
-    {
-      command: "change background colour to *",
-      callback: (color) => {
-        document.body.style.background = color;
-      },
-    },
-    {
-      command: "reset",
-      callback: () => {
-        handleReset();
-      },
-    },
-    ,
-    {
-      command: "reset background colour",
-      callback: () => {
-        document.body.style.background = `rgba(0, 0, 0, 0.8)`;
-      },
-    },
-  ];
-  const { transcript, resetTranscript } = useSpeechRecognition({commands});
+const ref = React.createRef();
+export default function App() {
+
+ 
+  const { transcript, resetTranscript } = useSpeechRecognition();
   const [isListening, setIsListening] = useState(false);
   const microphoneRef = useRef(null);
-  console.log({transcript})
   if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
     return (
       <div className="mircophone-container">
@@ -41,6 +17,7 @@ function App() {
       </div>
     );
   }
+  
   const handleListing = () => {
     setIsListening(true);
     microphoneRef.current.classList.add("listening");
@@ -57,35 +34,36 @@ function App() {
     stopHandle();
     resetTranscript();
   };
+
   return (
-    <div className="microphone-wrapper">
-      <div className="mircophone-container">
+    <div className="App">
         <div
           className="microphone-icon-container"
           ref={microphoneRef}
           onClick={handleListing}
         >
-          <img alt='picsum' src={'https://picsum.photos/200'} className="microphone-icon" />
+          Click to start listening
         </div>
-        {`the speech is: ${transcript} ` }
+    <br/>
         <div className="microphone-status">
-          {isListening ? "Listening........." : "Click to start Listening"}
+          {isListening ? `Listening.........${`the speech is: ${transcript} ` }` : ""}
         </div>
+    <br/>
         {isListening && (
           <button className="microphone-stop btn" onClick={stopHandle}>
             Stop
           </button>
         )}
+
+<div>
+      <Pdf targetRef={ref} filename="code-example.pdf">
+        {({ toPdf }) => <><button onClick={toPdf}>Generate Pdf</button><br/></>}
+      </Pdf>
+      <div ref={ref}>
+        <h1>Recorded Words</h1>
+        <h2>{transcript}</h2>
       </div>
-      {transcript && (
-        <div className="microphone-result-container">
-          <div className="microphone-result-text">{transcript}</div>
-          <button className="microphone-reset btn" onClick={handleReset}>
-            Reset
-          </button>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
-export default App;
